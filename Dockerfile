@@ -8,6 +8,7 @@ ENV NGINX_RTMP_VERSION 1.2.0
 ENV FFMPEG_VERSION 3.3.2
 
 EXPOSE 80
+EXPOSE 1935
 
 # create directories
 RUN mkdir /src /config /logs /data /static

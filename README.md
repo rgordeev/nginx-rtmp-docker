@@ -8,7 +8,7 @@ How to use
 ----------
 
 1. Build and run the container (`docker build -t nginx_rtmp .` &
-   `docker run -d -p 8080:80 nginx_rtmp`).
+   `docker run -d -p 8080:80 -p 1935:1935 nginx_rtmp`).
 
 2. Stream your live content to `rtmp://localhost:1935/hls/stream_name` where
    `stream_name` is the name of your stream. E.g. broadcasting an avi file:

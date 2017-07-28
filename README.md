@@ -1,6 +1,8 @@
 NGINX RTMP Dockerfile
 =====================
 
+Based on this repo [https://github.com/brocaar/nginx-rtmp-dockerfile](https://github.com/brocaar/nginx-rtmp-dockerfile).
+
 This Dockerfile installs NGINX configured with `nginx-rtmp-module`, ffmpeg
 and some default settings for HLS live streaming.
 
@@ -55,3 +57,4 @@ Links
 * https://github.com/arut/nginx-rtmp-module
 * https://www.ffmpeg.org/
 * https://obsproject.com/
+* https://github.com/brocaar/nginx-rtmp-dockerfile

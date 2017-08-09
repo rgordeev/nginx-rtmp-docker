@@ -1,4 +1,4 @@
-FROM 2chat/ubuntu:trusty
+FROM 2chat/ubuntu:xenial
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV PATH $PATH:/usr/local/nginx/sbin

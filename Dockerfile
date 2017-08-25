@@ -15,13 +15,15 @@ EXPOSE 1935
 RUN mkdir /src /config /logs /data /static
 
 # install nginx dependencies
-RUN apt-get install -y --no-install-recommends libpcre3-dev \
+RUN set -x \ 
+  && apt-get install -y --no-install-recommends libpcre3-dev \
   zlib1g-dev libssl-dev wget && \
   rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
 # get nginx source
-RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
+RUN set -x \ 
+  && wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
   && tar zxf nginx-${NGINX_VERSION}.tar.gz \
   && rm nginx-${NGINX_VERSION}.tar.gz \
 # get nginx-rtmp module source
@@ -31,7 +33,8 @@ RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
 
 # compile nginx with rtmp module
 WORKDIR /src/nginx-${NGINX_VERSION}
-RUN ./configure --with-http_ssl_module \
+RUN set -x \
+  && ./configure --with-http_ssl_module \
   --add-module=/src/nginx-rtmp-module-${NGINX_RTMP_VERSION} \
   --with-http_stub_status_module \
  # set up nginx config directory 

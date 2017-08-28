@@ -1,25 +1,18 @@
-FROM 2chat/ubuntu:xenial
+FROM alpine:3.6
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV PATH $PATH:/usr/local/nginx/sbin
+MAINTAINER Roman Gordeev <roma.gordeev@gmail.com>
 
 # set up nginx and nginx-rtmp-module versions
 ENV NGINX_VERSION 1.13.3
 ENV NGINX_RTMP_VERSION 1.2.0
 
-EXPOSE 8080
-EXPOSE 0-65535/udp
-EXPOSE 1935
+# create required directories
+RUN mkdir /src /data /static
 
-# create directories
-RUN mkdir /src /config /logs /data /static
+# install base nginx dependencies openssl-dev pcre-dev zlib-dev wget build-base
+RUN apk --update add openssl-dev pcre-dev zlib-dev wget build-base
 
-# install nginx dependencies
-RUN set -x \ 
-  && apt-get install -y --no-install-recommends libpcre3-dev \
-  zlib1g-dev libssl-dev wget && \
-  rm -rf /var/lib/apt/lists/*
-
+# set /src as current directory
 WORKDIR /src
 # get nginx source
 RUN set -x \ 
@@ -27,29 +20,46 @@ RUN set -x \
   && tar zxf nginx-${NGINX_VERSION}.tar.gz \
   && rm nginx-${NGINX_VERSION}.tar.gz \
 # get nginx-rtmp module source
-  && wget https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_VERSION}.tar.gz \
+  && wget --no-check-certificate https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_VERSION}.tar.gz \
   && tar zxf v${NGINX_RTMP_VERSION}.tar.gz \
   && rm v${NGINX_RTMP_VERSION}.tar.gz
 
 # compile nginx with rtmp module
 WORKDIR /src/nginx-${NGINX_VERSION}
 RUN set -x \
-  && ./configure --with-http_ssl_module \
-  --add-module=/src/nginx-rtmp-module-${NGINX_RTMP_VERSION} \
-  --with-http_stub_status_module \
- # set up nginx config directory 
-  --conf-path=/config/nginx.conf \
- # set up nginx logs dirs
-  --error-log-path=/logs/error.log \
-  --http-log-path=/logs/access.log \
+  && ./configure \
+# add modules to build with
+        --with-http_ssl_module \
+        --with-http_gzip_static_module \
+        --with-http_stub_status_module \
+        --add-module=/src/nginx-rtmp-module-${NGINX_RTMP_VERSION} \
+# set up base path for nginx installation and logs
+        --prefix=/etc/nginx \
+        --http-log-path=/var/log/nginx/access.log \
+        --error-log-path=/var/log/nginx/error.log \
+        --sbin-path=/usr/local/sbin/nginx \
   && make \
-  && make install
+  && make install \
+# clean up after build
+  && apk del build-base \
+  && rm -rf /tmp/src \
+  && rm -rf /var/cache/apk/*
+
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log
+RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
 # install nginx config 
-COPY nginx.conf /config/nginx.conf
+COPY nginx.conf /etc/nginx/conf/nginx.conf
 # add stat.xsl for rtmp module
 COPY static/* /static/
 
-WORKDIR /
-# launch nginx
-CMD "nginx"
+VOLUME ["/var/log/nginx"]
+
+WORKDIR /etc/nginx
+
+EXPOSE 8080
+EXPOSE 433
+EXPOSE 1935
+
+CMD ["nginx", "-g", "daemon off;"]

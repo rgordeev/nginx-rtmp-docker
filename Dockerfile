@@ -55,6 +55,7 @@ COPY nginx.conf /etc/nginx/conf/nginx.conf
 COPY static/* /static/
 
 VOLUME ["/var/log/nginx"]
+VOLUME ["/data"]
 
 WORKDIR /etc/nginx
 

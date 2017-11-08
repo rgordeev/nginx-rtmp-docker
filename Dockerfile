@@ -60,7 +60,6 @@ VOLUME ["/data"]
 WORKDIR /etc/nginx
 
 EXPOSE 8080
-EXPOSE 433
 EXPOSE 1935
 
 CMD ["nginx", "-g", "daemon off;"]
